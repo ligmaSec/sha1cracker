@@ -1,10 +1,10 @@
 use std::error::Error;
-use std::{env, process};
+use std::env;
 use std::fs::File;
 use sha1_smol::Sha1;
-use std::io::{BufRead, BufReader};
+use std::io::{Read, BufReader};
 
-
+// more hashing algorithms will be added in the future
 const SHA1_HEX_STRING_LENGTH: usize = 40;
 
 fn print_usage() {
@@ -27,10 +27,13 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
    
     let file = File::open(wordlist).expect("file not found");
-    let reader = BufReader::new(file);
+    let mut reader = BufReader::new(file);
+    let mut buffer = Vec::new();
+    reader.read_to_end(&mut buffer)?;
 
-    for line in reader.lines() {
-        let line = line?;
+    let file_contents = String::from_utf8_lossy(&buffer);
+
+    for line in file_contents.lines() {
         let word = line.trim();
 
         if sha1_hash == Sha1::from(word).digest().to_string() {
@@ -42,7 +45,5 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
     Ok(())
 
-    //assert_eq!(hasher.digest().to_string(), "aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d");
-    //println!("the hash cleartext is {}", str::from_utf8(word).unwrap());
 
 }
